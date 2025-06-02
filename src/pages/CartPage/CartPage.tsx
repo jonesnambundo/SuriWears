@@ -1,15 +1,22 @@
 import { useSelector, useDispatch } from "react-redux";
 import { type RootState } from "../../store/store";
-import { increaseQuantity, decreaseQuantity, removeFromCart } from "../../store/cartSlice";
+import {
+  increaseQuantity,
+  decreaseQuantity,
+  removeFromCart,
+} from "../../store/cartSlice";
 import { Link } from "react-router-dom";
 
 function CartPage() {
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const dispatch = useDispatch();
 
-  const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const total = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
 
-   if (cartItems.length === 0)
+  if (cartItems.length === 0)
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
@@ -33,8 +40,15 @@ function CartPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="bg-white lg:col-span-2 shadow-md p-4 rounded-md">
           {cartItems.map((item) => (
-            <div key={item.id} className="flex items-center gap-4 py-4 border-b">
-              <img src={item.image} alt={item.title} className="w-24 h-24 object-fill rounded" />
+            <div
+              key={item.id}
+              className="flex items-center gap-4 py-4 border-b"
+            >
+              <img
+                src={item.image}
+                alt={item.title}
+                className="w-24 h-24 object-fill rounded"
+              />
 
               <div className="flex-1">
                 <p className="font-semibold">{item.title}</p>
@@ -90,9 +104,11 @@ function CartPage() {
                 </div>
               </div>
             </div>
-            <button className="w-full bg-zinc-200 px-6 py-3 rounded-lg hover:bg-zinc-300">
-              Proceed to checkout
-            </button>
+            <Link to="/checkout">
+              <button className="w-full bg-zinc-200 px-6 py-3 rounded-lg hover:bg-zinc-300">
+                Proceed to checkout
+              </button>
+            </Link>
           </div>
         </div>
       </div>
