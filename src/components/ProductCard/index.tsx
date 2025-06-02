@@ -8,8 +8,8 @@ type Props = {
 
 function ProductCard({ title, price, description, image, category }: Props) {
   const getDescription = (description: string) => {
-    if (description.length > 75) {
-      return description.slice(0, 71) + "...";
+    if (description.length > 72) {
+      return description.slice(0, 68) + "...";
     }
     return description;
   };

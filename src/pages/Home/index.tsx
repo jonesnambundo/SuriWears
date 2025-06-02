@@ -1,6 +1,7 @@
 import { useEffect, useState, type JSX } from "react";
 import ProductsList from "../../components/ProductsList";
 import Footer from "../../components/Footer";
+import CartPage from "../CartPage/CartPage";
 
 
 export type Product = {
@@ -72,6 +73,7 @@ function Home(): JSX.Element {
         </div>
 
         <ProductsList products={filteredProducts} />
+        <CartPage />
       </div>
       <Footer />
     </div>
