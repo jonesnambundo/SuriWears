@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+:root {
+  font-family: "Poppins", sans-serif;
+}
+
+body{
+  background-color: #F5F5F5;
+}
+
+.bg {
+  background: url('./assets/images/Banner.png');
+  background-size: cover;
+  height: 70vh;
+}
