@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import ProductCard from "../ProductCard";
 
-type Product = {
+export type Product = {
   id: number;
   title: string;
   price: number;
@@ -15,6 +15,14 @@ type Props = {
 };
 
 const ProductsList = ({ products }: Props) => {
+  if (products.length === 0) {
+    return (
+      <div className="max-w-[1024px] mx-auto my-10 text-center text-gray-500">
+        <p>No products found.</p>
+      </div>
+    );
+  }
+
   return (
     <div>
       <ul className="max-w-[1024px] mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 my-10">

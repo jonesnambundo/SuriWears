@@ -28,10 +28,10 @@ function CartPage() {
     );
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="max-w-[1024px] mx-auto px-4 py-8">
       <h2 className="text-2xl font-bold mb-8">Shopping Cart</h2>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className=" bg-white lg:col-span-2 shadow-md p-4 rounded-md">
+        <div className="bg-white lg:col-span-2 shadow-md p-4 rounded-md">
           {cartItems.map((item) => (
             <div key={item.id} className="flex items-center gap-4 py-4 border-b">
               <img src={item.image} alt={item.title} className="w-24 h-24 object-fill rounded" />

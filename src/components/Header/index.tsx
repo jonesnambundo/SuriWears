@@ -1,16 +1,22 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { ShoppingCart, User } from "lucide-react";
-import { useSelector } from "react-redux";
-import type { RootState } from "../store/store";
+import { useSelector, useDispatch } from "react-redux";
+import type { RootState } from "../../store/store";
+import { setSearchTerm } from "../../store/cartSlice"; // ← importante: importa do cartSlice
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false);
+  const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   const handleUser = () => {
     setIsOpen(!isOpen);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(setSearchTerm(e.target.value));
   };
 
   return (
@@ -58,7 +64,7 @@ function Header() {
         <nav className="max-w-[1024px] flex justify-between items-center container mx-auto md:py-6 px-2">
           <div className="flex items-center">
             <Link to="/">
-              <h1 className="py-2 rounded">SuriWear</h1>
+              <h1 className="font-lobster italic font-bold">SuriWear</h1>
             </Link>
           </div>
 
@@ -67,6 +73,7 @@ function Header() {
               type="text"
               placeholder="Search Product"
               className="bg-zinc-100 rounded-md border border-zinc-200 focus:outline-none py-3 px-3 w-full"
+              onChange={handleSearchChange}
             />
           </form>
 
@@ -76,7 +83,7 @@ function Header() {
               className="cursor-pointer bg-gray-100 px-3 py-2 rounded-full"
             />
             {totalItems > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">
                 {totalItems}
               </span>
             )}

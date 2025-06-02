@@ -1,8 +1,8 @@
 import { useEffect, useState, type JSX } from "react";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store/store";
 import ProductsList from "../../components/ProductsList";
 import Footer from "../../components/Footer";
-import CartPage from "../CartPage/CartPage";
-
 
 export type Product = {
   id: number;
@@ -22,34 +22,28 @@ const categories: string[] = [
 ];
 
 function Home(): JSX.Element {
-
   const [products, setProducts] = useState<Product[]>([]);
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const searchTerm = useSelector((state: RootState) => state.cart.searchTerm);
 
   useEffect(() => {
     fetch("https://fakestoreapi.com/products")
       .then((res) => res.json())
-      .then((data: Product[]) => {
-        setProducts(data);
-        setFilteredProducts(data);
-      })
+      .then((data: Product[]) => setProducts(data))
       .catch((error) => console.error("Error fetching products:", error));
   }, []);
 
-  // Filtra produtos ao mudar categoria
+  const filteredByCategory = products.filter((product) => {
+    if (selectedCategory === "All") return true;
+    return product.category.toLowerCase() === selectedCategory.toLowerCase();
+  });
+
+  const filteredBySearchTerm = filteredByCategory.filter((product) =>
+    product.title.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   function handleCategoryClick(category: string) {
     setSelectedCategory(category);
-
-    if (category === "All") {
-      setFilteredProducts(products);
-    } else {
-      setFilteredProducts(
-        products.filter(
-          (product) => product.category.toLowerCase() === category.toLowerCase()
-        )
-      );
-    }
   }
 
   return (
@@ -63,8 +57,8 @@ function Home(): JSX.Element {
               onClick={() => handleCategoryClick(cat)}
               className={`py-2 px-4 rounded-md text-black transition-all ease-in ${
                 selectedCategory.toLowerCase() === cat.toLowerCase()
-                  ? "bg-yellow-100 scale-105"
-                  : "bg-yellow-50 hover:bg-zinc-400 cursor-pointer"
+                  ? "bg-gray-200 scale-105"
+                  : "bg-gray-200 hover:bg-zinc-400 cursor-pointer"
               }`}
             >
               {cat.charAt(0).toUpperCase() + cat.slice(1)}
@@ -72,8 +66,7 @@ function Home(): JSX.Element {
           ))}
         </div>
 
-        <ProductsList products={filteredProducts} />
-        <CartPage />
+        <ProductsList products={filteredBySearchTerm} />
       </div>
       <Footer />
     </div>

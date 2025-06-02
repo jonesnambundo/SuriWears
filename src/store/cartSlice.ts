@@ -10,10 +10,12 @@ export type CartItem = {
 
 type CartState = {
   items: CartItem[];
+  searchTerm: string;
 };
 
 const initialState: CartState = {
   items: [],
+  searchTerm: "",
 };
 
 const cartSlice = createSlice({
@@ -48,8 +50,19 @@ const cartSlice = createSlice({
     clearCart(state) {
       state.items = [];
     },
+    setSearchTerm(state, action: PayloadAction<string>) {
+      state.searchTerm = action.payload;
+    },
   },
 });
 
-export const { addToCart, removeFromCart, increaseQuantity, decreaseQuantity, clearCart } = cartSlice.actions;
+export const {
+  addToCart,
+  removeFromCart,
+  increaseQuantity,
+  decreaseQuantity,
+  clearCart,
+  setSearchTerm,
+} = cartSlice.actions;
+
 export default cartSlice.reducer;
