@@ -57,8 +57,8 @@ function Home(): JSX.Element {
   return (
     <div>
       <div className="bg"></div>
-      <div className="max-w-[1024px] mx-auto my-10 px-4">
-        <div className="flex gap-4 mb-6">
+      <div className="max-w-[1280px] mx-auto my-10 px-4">
+       <div className="flex flex-wrap gap-4 mb-6">
           {categories.map((cat) => (
             <button
               key={cat}

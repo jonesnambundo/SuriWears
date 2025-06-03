@@ -61,7 +61,7 @@ function ProductDetails() {
   }
 
   return (
-    <div className="max-w-[1024px] mx-auto px-4 py-8">
+    <div className="max-w-[1280px] mx-auto px-4 py-8">
       <Link to="/" className="mb-8 inline-block text-blue-600">
         &larr; Back to products
       </Link>

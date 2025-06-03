@@ -104,7 +104,7 @@ export default function CheckoutCards() {
 
   if (success) {
     return (
-      <div className="max-w-[1024px] mx-auto px-12 py-8 bg-white border border-gray-300 rounded-lg shadow-sm text-black m-16">
+    <div className="max-w-[1280px] mx-4 sm:mx-auto px-4 sm:px-12 py-8 bg-white border border-gray-300 rounded-lg shadow-sm text-black m-12">
         <h2 className="text-2xl font-bold mb-4">Thank you very much</h2>
         <p>
           We are pleased to inform you that we have successfully received your
@@ -151,7 +151,7 @@ export default function CheckoutCards() {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="max-w-[1024px] mx-auto px-4 py-8 space-y-8 text-white"
+      className="max-w-[1280px] mx-auto px-4 py-8 space-y-8 text-white"
       noValidate
     >
       {/* Billing Information */}

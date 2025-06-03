@@ -8,18 +8,18 @@ type Props = {
 
 function ProductCard({ title, price, description, image, category }: Props) {
   const getDescription = (description: string) => {
-    if (description.length > 72) {
-      return description.slice(0, 68) + "...";
+    if (description.length > 65) {
+      return description.slice(0, 61) + "...";
     }
     return description;
   };
   return (
     <div className="shadow-lg border-2 border-zinc-200 rounded-md cursor-pointer max-w-sm">
-      <div className="border-zinc-200 p-2">
+      <div className="border-zinc-200 p-2 bg-white">
         <img
           src={image}
           alt={title}
-          className="w-full h-48 object-fill rounded-md"
+          className="w-full h-48 object-contain rounded-md"
         />
       </div>
 
