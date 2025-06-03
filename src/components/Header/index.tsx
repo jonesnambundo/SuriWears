@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ShoppingCart, User } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../store/store";
-import { setSearchTerm } from "../../store/cartSlice"; 
+import { setSearchTerm } from "../../store/cartSlice";
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -64,7 +64,9 @@ function Header() {
         <nav className="max-w-[1024px] flex justify-between items-center container mx-auto md:py-6 px-2">
           <div className="flex items-center">
             <Link to="/">
-              <h1 className="font-lobster italic font-bold">SuriWear</h1>
+              <h1 className="font-pacifico text-xl italic font-bold my-4 text-yellow-500">
+                SunShine
+              </h1>
             </Link>
           </div>
 

@@ -32,7 +32,9 @@ function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             <div>
               <Link to="/">
-                <h1 className="text-xl font-semibold my-4">SuriWear</h1>
+                <h1 className="font-pacifico text-xl italic font-bold my-4 text-yellow-500">
+                  SunShine
+                </h1>
               </Link>
               <p className="text-sm">
                 Lorem, ipsum dolor sit amet consectetur numquam perferendis,
