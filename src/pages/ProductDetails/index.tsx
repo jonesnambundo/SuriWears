@@ -41,6 +41,7 @@ function ProductDetails() {
           image: product.image,
         })
       );
+      alert("Added to cart!");
     }
   };
 

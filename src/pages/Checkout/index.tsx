@@ -1,15 +1,74 @@
 import { CreditCard, Barcode } from "lucide-react";
-import { useState } from "react";
-import { useFormik } from "formik";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useDispatch } from "react-redux";
+import { clearCart } from "../../store/cartSlice";
 
-import * as Yup from "yup";
+const cpfRegex = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/;
 
 export default function CheckoutCards() {
   const [payWithCard, setPayWithCard] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useDispatch();
 
-  const form = useFormik({
-    initialValues: {
+  const schema = z
+    .object({
+      fullName: z.string().min(5, "Name must be at least 5 characters long"),
+      email: z.string().email("Invalid email address"),
+      cpf: z.string().regex(cpfRegex, "Invalid CPF (format: 000.000.000-00)"),
+      deliveryEmail: z.string().email("Invalid email address"),
+      confirmDeliveryEmail: z.string(),
+      cardOwner: z.string().optional(),
+      cpfCardOwner: z.string().optional(),
+      cardDisplayName: z.string().optional(),
+      cardNumber: z.string().optional(),
+      expiresMonth: z.string().optional(),
+      expiresYear: z.string().optional(),
+      cardCode: z.string().optional(),
+      installments: z.string().optional(),
+    })
+    .refine((data) => data.deliveryEmail === data.confirmDeliveryEmail, {
+      path: ["confirmDeliveryEmail"],
+      message: "Emails must match",
+    })
+    .refine(
+      (data) => {
+        if (payWithCard) {
+          return (
+            data.cardOwner &&
+            data.cardOwner.length >= 5 &&
+            data.cpfCardOwner &&
+            cpfRegex.test(data.cpfCardOwner) &&
+            data.cardDisplayName &&
+            data.cardNumber &&
+            data.expiresMonth &&
+            data.expiresYear &&
+            data.cardCode
+          );
+        }
+        return true;
+      },
+      {
+        path: ["cardOwner"],
+        message: "Please fill all card details correctly",
+      }
+    );
+
+  type FormData = z.infer<typeof schema>;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    mode: "onTouched",
+    reValidateMode: "onChange",
+    defaultValues: {
       fullName: "",
       email: "",
       cpf: "",
@@ -24,81 +83,32 @@ export default function CheckoutCards() {
       cardCode: "",
       installments: "1",
     },
-    validationSchema: Yup.object({
-      fullName: Yup.string()
-        .min(5, "Name must be at least 5 characters long")
-        .required("This field is required"),
-      email: Yup.string()
-        .email("Invalid email address")
-        .required("This field is required"),
-      cpf: Yup.string()
-        .matches(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "Invalid CPF (format: 000.000.000-00)")
-        .required("CPF is required"),
-      deliveryEmail: Yup.string()
-        .email("Invalid email address")
-        .required("This field is required"),
-      confirmDeliveryEmail: Yup.string()
-        .oneOf([Yup.ref("deliveryEmail")], "Emails must match")
-        .required("This field is required"),
-      cardOwner: Yup.string().when([], {
-        is: () => payWithCard,
-        then: (schema) =>
-          schema.min(5, "Name must be at least 5 characters long").required("This field is required"),
-        otherwise: (schema) => schema.notRequired(),
-      }),
-      cpfCardOwner: Yup.string().when([], {
-        is: () => payWithCard,
-        then: (schema) =>
-          schema.length(14, "This field must be exactly 14 characters").required("This field is required"),
-        otherwise: (schema) => schema.notRequired(),
-      }),
-      cardDisplayName: Yup.string().when([], {
-        is: () => payWithCard,
-        then: (schema) => schema.required("This field is required"),
-        otherwise: (schema) => schema.notRequired(),
-      }),
-      cardNumber: Yup.string().when([], {
-        is: () => payWithCard,
-        then: (schema) => schema.required("This field is required"),
-        otherwise: (schema) => schema.notRequired(),
-      }),
-      expiresMonth: Yup.string().when([], {
-        is: () => payWithCard,
-        then: (schema) => schema.required("This field is required"),
-        otherwise: (schema) => schema.notRequired(),
-      }),
-
-      expiresYear: Yup.string().when([], {
-        is: () => payWithCard,
-        then: (schema) => schema.required("This field is required"),
-        otherwise: (schema) => schema.notRequired(),
-      }),
-
-      cardCode: Yup.string().when([], {
-        is: () => payWithCard,
-        then: (schema) => schema.required("This field is required"),
-        otherwise: (schema) => schema.notRequired(),
-      }),
-    }),
-
-    onSubmit: (values) => {
-      setSuccess(true);
-      console.log("Form data:", values);
-    },
   });
 
-  const getErrorMessage = (fieldName: string) => {
-    const isTouched = form.touched[fieldName];
-    const errorMsg = form.errors[fieldName];
-    return isTouched && errorMsg ? errorMsg : "";
+  const onSubmit = (data: FormData) => {
+    setIsLoading(true);
+    console.log("Form data:", data);
+
+    setTimeout(() => {
+      setSuccess(true);
+      setIsLoading(false);
+      reset();
+    }, 2000);
   };
+
+  useEffect(() => {
+    if (success) {
+      dispatch(clearCart());
+    }
+  }, [success, dispatch]);
 
   if (success) {
     return (
-      <div className="max-w-[1024px] mx-auto px-12 py-8 text-white bg-zinc-900 rounded-lg mt-16">
+      <div className="max-w-[1024px] mx-auto px-12 py-8 bg-white border border-gray-300 rounded-lg shadow-sm text-black m-16">
         <h2 className="text-2xl font-bold mb-4">Thank you very much</h2>
         <p>
-          We are pleased to inform you that we have successfully received your order!
+          We are pleased to inform you that we have successfully received your
+          order!
         </p>
         <p className="mt-4 font-semibold">
           Below are the details of your purchase:
@@ -109,23 +119,27 @@ export default function CheckoutCards() {
           </li>
           <li>
             Payment method:{" "}
-            <strong>
-              {payWithCard ? "Credit Card" : "Bank Slip"}
-            </strong>
+            <strong>{payWithCard ? "Credit Card" : "Bank Slip"}</strong>
           </li>
         </ul>
         {!payWithCard && (
           <p>
-            If you chose to pay by bank slip, please note that confirmation may take up to 3 business days. After payment approval, we will send you an email containing the activation code for the game.
+            If you chose to pay by bank slip, please note that confirmation may
+            take up to 3 business days. After payment approval, we will send you
+            an email containing the activation code for the game.
           </p>
         )}
         {payWithCard && (
           <p>
-            If you chose to pay by credit card, the activation code will be released after the transaction is approved by the card operator. You will receive the code at the email registered in our store.
+            If you chose to pay by credit card, the activation code will be
+            released after the transaction is approved by the card operator. You
+            will receive the code at the email registered in our store.
           </p>
         )}
         <p className="mt-4">
-          Please check your inbox and spam folder to ensure you receive our communication. If you have any questions or need more information, please contact us through our customer service channels.
+          Please check your inbox and spam folder to ensure you receive our
+          communication. If you have any questions or need more information,
+          please contact us through our customer service channels.
         </p>
         <p className="mt-6 font-semibold">
           Thank you for choosing Suri. We hope you enjoy your purchase!
@@ -136,11 +150,12 @@ export default function CheckoutCards() {
 
   return (
     <form
-      onSubmit={form.handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       className="max-w-[1024px] mx-auto px-4 py-8 space-y-8 text-white"
+      noValidate
     >
       {/* Billing Information */}
-      <div className="bg-white rounded-lg p-6 shadow-lg">
+      <div className="bg-white rounded-lg border border-gray-300 shadow-sm p-6">
         <h2 className="text-xl font-semibold mb-6 text-black">
           Billing Information
         </h2>
@@ -148,39 +163,41 @@ export default function CheckoutCards() {
           <div>
             <input
               id="fullName"
-              name="fullName"
-              type="text"
               placeholder="Full Name"
-              className="w-full px-4 py-3 rounded bg-zinc-200 text-black focus:outline-none"
-              {...form.getFieldProps("fullName")}
+              className={`w-full px-4 py-3 rounded bg-zinc-200 text-black focus:outline-none ${
+                errors.fullName ? "border border-red-500" : ""
+              }`}
+              {...register("fullName")}
             />
-            <small className="text-red-500">
-              {getErrorMessage("fullName")}
-            </small>
+            <small className="text-red-500">{errors.fullName?.message}</small>
           </div>
+
           <div>
             <input
               id="email"
-              name="email"
               type="email"
               placeholder="Email"
-              className="w-full px-4 py-3 rounded bg-zinc-200 text-black focus:outline-none"
-              {...form.getFieldProps("email")}
+              className={`w-full px-4 py-3 rounded bg-zinc-200 text-black focus:outline-none ${
+                errors.email ? "border border-red-500" : ""
+              }`}
+              {...register("email")}
             />
-            <small className="text-red-500">{getErrorMessage("email")}</small>
+            <small className="text-red-500">{errors.email?.message}</small>
           </div>
+
           <div>
             <input
               id="cpf"
-              name="cpf"
-              type="text"
-              placeholder="CPF"
-              className="w-full px-4 py-3 rounded bg-zinc-200 text-black focus:outline-none"
-              {...form.getFieldProps("cpf")}
+              placeholder="CPF (000.000.000-00)"
+              className={`w-full px-4 py-3 rounded bg-zinc-200 text-black focus:outline-none ${
+                errors.cpf ? "border border-red-500" : ""
+              }`}
+              {...register("cpf")}
             />
-            <small className="text-red-500">{getErrorMessage("cpf")}</small>
+            <small className="text-red-500">{errors.cpf?.message}</small>
           </div>
         </div>
+
         <h3 className="text-lg font-semibold mb-4 text-black">
           Delivery Information - Digital Content
         </h3>
@@ -188,42 +205,44 @@ export default function CheckoutCards() {
           <div>
             <input
               id="deliveryEmail"
-              name="deliveryEmail"
               type="email"
               placeholder="Email"
-              className="w-full px-4 py-3 rounded bg-zinc-200 text-black focus:outline-none"
-              {...form.getFieldProps("deliveryEmail")}
+              className={`w-full px-4 py-3 rounded bg-zinc-200 text-black focus:outline-none ${
+                errors.deliveryEmail ? "border border-red-500" : ""
+              }`}
+              {...register("deliveryEmail")}
             />
             <small className="text-red-500">
-              {getErrorMessage("deliveryEmail")}
+              {errors.deliveryEmail?.message}
             </small>
           </div>
           <div>
             <input
               id="confirmDeliveryEmail"
-              name="confirmDeliveryEmail"
               type="email"
               placeholder="Confirm Email"
-              className="w-full px-4 py-3 rounded bg-zinc-200 text-black focus:outline-none"
-              {...form.getFieldProps("confirmDeliveryEmail")}
+              className={`w-full px-4 py-3 rounded bg-zinc-200 text-black focus:outline-none ${
+                errors.confirmDeliveryEmail ? "border border-red-500" : ""
+              }`}
+              {...register("confirmDeliveryEmail")}
             />
             <small className="text-red-500">
-              {getErrorMessage("confirmDeliveryEmail")}
+              {errors.confirmDeliveryEmail?.message}
             </small>
           </div>
         </div>
       </div>
 
       {/* Payment */}
-      <div className="bg-white shadow-lg rounded-lg p-6">
+      <div className="bg-white rounded-lg border border-gray-300 shadow-sm p-6">
         <h2 className="text-xl font-semibold mb-6 text-black">Payment</h2>
         <div className="flex gap-4 mb-4">
           <button
             type="button"
             onClick={() => setPayWithCard(false)}
             className={`flex items-center gap-2 px-4 py-2 rounded ${
-              !payWithCard ? "bg-zinc-700" : "bg-zinc-800"
-            } text-gray-300 hover:bg-zinc-700`}
+              !payWithCard ? "bg-green-600" : "bg-zinc-600"
+            } text-gray-300`}
           >
             <Barcode className="w-5 h-5" />
             Bank Slip
@@ -232,8 +251,8 @@ export default function CheckoutCards() {
             type="button"
             onClick={() => setPayWithCard(true)}
             className={`flex items-center gap-2 px-4 py-2 rounded ${
-              payWithCard ? "bg-zinc-700" : "bg-zinc-800"
-            } text-gray-300 hover:bg-zinc-700`}
+              payWithCard ? "bg-green-600" : "bg-zinc-600"
+            } text-gray-300`}
           >
             <CreditCard className="w-5 h-5" />
             Credit Card
@@ -248,32 +267,33 @@ export default function CheckoutCards() {
         )}
 
         {payWithCard && (
-          <div className="bg-white shadow-lg rounded-lg p-6 text-black">
+          <div className="bg-zinc-100 rounded-md p-6 shadow-sm text-black">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <input
                   id="cardOwner"
-                  name="cardOwner"
-                  type="text"
                   placeholder="Cardholder Name"
-                  className="w-full px-4 py-3 rounded bg-zinc-200 focus:outline-none"
-                  {...form.getFieldProps("cardOwner")}
+                  className={`w-full px-4 py-3 rounded bg-zinc-200 focus:outline-none ${
+                    errors.cardOwner ? "border border-red-500" : ""
+                  }`}
+                  {...register("cardOwner")}
                 />
                 <small className="text-red-500">
-                  {getErrorMessage("cardOwner")}
+                  {errors.cardOwner?.message}
                 </small>
               </div>
+
               <div>
                 <input
                   id="cpfCardOwner"
-                  name="cpfCardOwner"
-                  type="text"
-                  placeholder="Cardholder CPF"
-                  className="w-full px-4 py-3 rounded bg-zinc-200 focus:outline-none"
-                  {...form.getFieldProps("cpfCardOwner")}
+                  placeholder="Cardholder CPF (000.000.000-00)"
+                  className={`w-full px-4 py-3 rounded bg-zinc-200 focus:outline-none ${
+                    errors.cpfCardOwner ? "border border-red-500" : ""
+                  }`}
+                  {...register("cpfCardOwner")}
                 />
                 <small className="text-red-500">
-                  {getErrorMessage("cpfCardOwner")}
+                  {errors.cpfCardOwner?.message}
                 </small>
               </div>
             </div>
@@ -282,27 +302,28 @@ export default function CheckoutCards() {
               <div>
                 <input
                   id="cardDisplayName"
-                  name="cardDisplayName"
-                  type="text"
                   placeholder="Name on Card"
-                  className="w-full px-4 py-3 rounded bg-zinc-200 focus:outline-none"
-                  {...form.getFieldProps("cardDisplayName")}
+                  className={`w-full px-4 py-3 rounded bg-zinc-200 focus:outline-none ${
+                    errors.cardDisplayName ? "border border-red-500" : ""
+                  }`}
+                  {...register("cardDisplayName")}
                 />
                 <small className="text-red-500">
-                  {getErrorMessage("cardDisplayName")}
+                  {errors.cardDisplayName?.message}
                 </small>
               </div>
+
               <div>
                 <input
                   id="cardNumber"
-                  name="cardNumber"
-                  type="text"
                   placeholder="Card Number"
-                  className="w-full px-4 py-3 rounded bg-zinc-200 focus:outline-none"
-                  {...form.getFieldProps("cardNumber")}
+                  className={`w-full px-4 py-3 rounded bg-zinc-200 focus:outline-none ${
+                    errors.cardNumber ? "border border-red-500" : ""
+                  }`}
+                  {...register("cardNumber")}
                 />
                 <small className="text-red-500">
-                  {getErrorMessage("cardNumber")}
+                  {errors.cardNumber?.message}
                 </small>
               </div>
             </div>
@@ -311,43 +332,45 @@ export default function CheckoutCards() {
               <div>
                 <input
                   id="expiresMonth"
-                  name="expiresMonth"
-                  type="text"
                   placeholder="Expiration Month"
                   maxLength={2}
-                  className="w-full px-4 py-3 rounded bg-zinc-200 focus:outline-none"
-                  {...form.getFieldProps("expiresMonth")}
+                  className={`w-full px-4 py-3 rounded bg-zinc-200 focus:outline-none ${
+                    errors.expiresMonth ? "border border-red-500" : ""
+                  }`}
+                  {...register("expiresMonth")}
                 />
                 <small className="text-red-500">
-                  {getErrorMessage("expiresMonth")}
+                  {errors.expiresMonth?.message}
                 </small>
               </div>
+
               <div>
                 <input
                   id="expiresYear"
-                  name="expiresYear"
-                  type="text"
                   placeholder="Expiration Year"
                   maxLength={4}
-                  className="w-full px-4 py-3 rounded bg-zinc-200 focus:outline-none"
-                  {...form.getFieldProps("expiresYear")}
+                  className={`w-full px-4 py-3 rounded bg-zinc-200 focus:outline-none ${
+                    errors.expiresYear ? "border border-red-500" : ""
+                  }`}
+                  {...register("expiresYear")}
                 />
                 <small className="text-red-500">
-                  {getErrorMessage("expiresYear")}
+                  {errors.expiresYear?.message}
                 </small>
               </div>
+
               <div>
                 <input
                   id="cardCode"
-                  name="cardCode"
-                  type="text"
                   placeholder="CVV"
                   maxLength={4}
-                  className="w-full px-4 py-3 rounded bg-zinc-200 focus:outline-none"
-                  {...form.getFieldProps("cardCode")}
+                  className={`w-full px-4 py-3 rounded bg-zinc-200 focus:outline-none ${
+                    errors.cardCode ? "border border-red-500" : ""
+                  }`}
+                  {...register("cardCode")}
                 />
                 <small className="text-red-500">
-                  {getErrorMessage("cardCode")}
+                  {errors.cardCode?.message}
                 </small>
               </div>
             </div>
@@ -357,23 +380,31 @@ export default function CheckoutCards() {
                 Installments
               </label>
               <select
-                name="installments"
+                id="installments"
                 className="w-40 px-4 py-3 rounded bg-zinc-200 text-black focus:outline-none"
-                {...form.getFieldProps("installments")}
+                {...register("installments")}
               >
                 <option value="1">1x of $169.90</option>
                 <option value="2">2x of $85.00</option>
                 <option value="3">3x of $56.63</option>
               </select>
+              <small className="text-red-500">
+                {errors.installments?.message}
+              </small>
             </div>
           </div>
         )}
 
         <button
           type="submit"
-          className="w-full my-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded"
+          disabled={isLoading}
+          className={`w-full my-2 font-semibold py-3 px-6 rounded text-white ${
+            isSubmitting
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-700"
+          }`}
         >
-          Complete Purchase
+          {isLoading ? "Finalizing purchase..." : "Finalize purchase"}
         </button>
       </div>
     </form>

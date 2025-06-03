@@ -3,7 +3,7 @@ import { useState } from "react";
 import { ShoppingCart, User } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "../../store/store";
-import { setSearchTerm } from "../../store/cartSlice"; // ← importante: importa do cartSlice
+import { setSearchTerm } from "../../store/cartSlice"; 
 
 function Header() {
   const [isOpen, setIsOpen] = useState(false);

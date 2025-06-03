@@ -23,14 +23,22 @@ const categories: string[] = [
 
 function Home(): JSX.Element {
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true); // Estado de loading
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const searchTerm = useSelector((state: RootState) => state.cart.searchTerm);
 
   useEffect(() => {
+    setLoading(true);
     fetch("https://fakestoreapi.com/products")
       .then((res) => res.json())
-      .then((data: Product[]) => setProducts(data))
-      .catch((error) => console.error("Error fetching products:", error));
+      .then((data: Product[]) => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching products:", error);
+        setLoading(false);
+      });
   }, []);
 
   const filteredByCategory = products.filter((product) => {
@@ -66,7 +74,12 @@ function Home(): JSX.Element {
           ))}
         </div>
 
-        <ProductsList products={filteredBySearchTerm} />
+        {/* Loading */}
+        {loading ? (
+          <div className="text-center py-20 text-xl font-semibold">Loading products...</div>
+        ) : (
+          <ProductsList products={filteredBySearchTerm} />
+        )}
       </div>
       <Footer />
     </div>
