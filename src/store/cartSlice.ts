@@ -11,11 +11,13 @@ export type CartItem = {
 type CartState = {
   items: CartItem[];
   searchTerm: string;
+  selectedCategory: string; 
 };
 
 const initialState: CartState = {
   items: [],
   searchTerm: "",
+  selectedCategory: "All", 
 };
 
 const cartSlice = createSlice({
@@ -53,6 +55,9 @@ const cartSlice = createSlice({
     setSearchTerm(state, action: PayloadAction<string>) {
       state.searchTerm = action.payload;
     },
+    setSelectedCategory(state, action: PayloadAction<string>) {
+      state.selectedCategory = action.payload; 
+    },
   },
 });
 
@@ -63,6 +68,7 @@ export const {
   decreaseQuantity,
   clearCart,
   setSearchTerm,
+  setSelectedCategory, // Ação para atualizar a categoria
 } = cartSlice.actions;
 
 export default cartSlice.reducer;
