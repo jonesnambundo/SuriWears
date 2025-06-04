@@ -22,8 +22,8 @@ function Header() {
   return (
     <header className="bg-white shadow-md ">
       <>
-        <div className="py-4 shadow-md ">
-          <ul className="max-w-[1280px] mx-auto flex flex-wrap justify-between  md:flex-row px-4 md:px-2 items-center relative">
+       <div className="py-2 md:py-1 md:block hidden md:shadow-md">
+          <ul className="max-w-[1280px] mx-auto flex flex-wrap justify-between md:flex-row px-4 md:px-2 items-center relative">
             <div className="flex gap-4">
               <li>
                 <Link to="/">Home</Link>
@@ -61,7 +61,7 @@ function Header() {
           </ul>
         </div>
 
-        <nav className="max-w-[1280px] flex justify-between items-center container mx-auto md:py-6 px-2">
+        <nav className="max-w-[1280px] flex justify-between items-center py-6 mx-auto md:py-6 px-2">
           <div className="flex items-center">
             <Link to="/">
               <h1 className="font-pacifico text-xl italic font-bold my-4 text-yellow-500">
